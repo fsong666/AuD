@@ -1,0 +1,27 @@
+all: test other_projexes
+.PHONY : all
+
+PROJ = test
+OBJS = test.o prim.o 
+SRCS := $(OBJS:.o=.cpp)
+CXX  := g++ -std=c++11 -pedantic -Wall -Wextra
+INSTALL_PATH = .
+
+$(PROJ): $(OBJS)
+	$(CXX) -o $@ $^
+
+include $(SRCS:.cpp=.d)
+%.d: %.cpp
+	set -e; rm -f $@; \
+	$(CXX) -MM $(CXXFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+.PHONY : install
+install:
+	install $(PROJ) $(INSTALL_PATH)
+	@echo "cp completed"
+
+.PHONY : clean 
+clean: 
+	-rm -f $(OBJS) $(PROJ) $(SRCS:.cpp=.d)
